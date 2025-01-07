@@ -15,6 +15,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { useCreateTaskMutation } from "@/redux/api/baseApi";
 import { addTask } from "@/redux/features/task/taskSlice";
 import { selectUsers } from "@/redux/features/user/userSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hook";
@@ -25,13 +26,21 @@ import { useState } from "react";
 import { useForm, SubmitHandler, FieldValues } from "react-hook-form";
 export function AddTaskModal() {
   const [open, setOpen] = useState(false);
-
-  const users = useAppSelector(selectUsers);
     const form = useForm();
-    const dispatch = useAppDispatch();
 
-    const onSubmit:SubmitHandler<FieldValues> = (data) =>{
-        dispatch(addTask(data as ITask));
+    const [ createTask, { data, isLoading, isError }]= useCreateTaskMutation();
+
+    console.log("Data",data);
+
+    const onSubmit:SubmitHandler<FieldValues> = async(data) =>{
+        const taskData ={
+          ...data,
+          isCompleted:false,
+        };
+
+        const res = await createTask(taskData).unwrap();
+        console.log("inside submit function", res);
+
         setOpen(false);
         form.reset();
     }
